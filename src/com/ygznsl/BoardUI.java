@@ -9,13 +9,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class BoardUI extends Application {
 
@@ -25,6 +25,7 @@ public final class BoardUI extends Application {
 
     private Parent createUI() {
         final HashMap<Position, TextField> textFields = new HashMap<>();
+        final BorderPane root = new BorderPane();
         final GridPane grid = new GridPane();
 
         for (int x = 0; x < 9; x++) {
@@ -80,7 +81,9 @@ public final class BoardUI extends Application {
             }).start();
         });
 
-        return grid;
+        root.setPadding(new Insets(10d));
+        root.setCenter(grid);
+        return root;
     }
 
     @Override
