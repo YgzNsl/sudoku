@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 public final class BoardUI extends Application {
 
@@ -54,13 +55,37 @@ public final class BoardUI extends Application {
             final CellValueChangedEventHandler eventHandler = (position, oldValue, newValue) -> {
                 final TextField txt = textFields.get(position);
                 if (txt != null) {
-                    Platform.runLater(() -> txt.setText(Optional.ofNullable(newValue).map(String::valueOf).orElse("")));
+                    final String text = Optional
+                            .ofNullable(newValue)
+                            .map(String::valueOf)
+                            .orElse("");
+
+                    Platform.runLater(() -> txt.setText(text));
                 }
             };
 
             btnFill.setDisable(true);
 
-            new Thread(() -> {
+            final Thread thread = new Thread(() -> {
+                final CountDownLatch latch = new CountDownLatch(textFields.size());
+
+                Platform.runLater(() -> {
+                    for (TextField textField : textFields.values()) {
+                        try {
+                            textField.setText("");
+                        } catch (Exception ex) {
+                        } finally {
+                            latch.countDown();
+                        }
+                    }
+                });
+
+                try {
+                    latch.await();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+
                 final Board board = new Board(eventHandler);
 
                 for (int x = 1; x <= 9; x++) {
@@ -72,13 +97,21 @@ public final class BoardUI extends Application {
                         final Cell cell = cells[y - 1];
 
                         if (txt != null) {
-                            Platform.runLater(() -> txt.setText(Optional.ofNullable(cell.getValue()).map(String::valueOf).orElse("")));
+                            final String text = Optional
+                                    .ofNullable(cell.getValue())
+                                    .map(String::valueOf)
+                                    .orElse("");
+
+                            Platform.runLater(() -> txt.setText(text));
                         }
                     }
                 }
 
                 Platform.runLater(() -> btnFill.setDisable(false));
-            }).start();
+            });
+
+            thread.setDaemon(true);
+            thread.start();
         });
 
         root.setPadding(new Insets(10d));

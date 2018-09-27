@@ -1,11 +1,12 @@
 package com.ygznsl.game;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class Board {
+public final class Board implements Serializable {
 
     protected static final HashMap<Integer, Position> SQUARE_STARTING_POSITIONS = new HashMap<>();
 
@@ -209,11 +210,11 @@ public final class Board {
 
         for (int x = 0; x < 9; x++) {
             for (int y = 0; y < 9; y++) {
-                try {
-                    Thread.sleep(250L);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
+//                try {
+//                    Thread.sleep(250L);
+//                } catch (InterruptedException ex) {
+//                    throw new RuntimeException(ex);
+//                }
 
                 final Cell cell = cells[x][y];
                 final HashSet<Integer> alreadyTried = tried.computeIfAbsent(cell.getPosition(), k -> new HashSet<>());
@@ -252,6 +253,10 @@ public final class Board {
                 }
             }
         }
+    }
+
+    protected Cell[][] getCells() {
+        return cells;
     }
 
     @Override
